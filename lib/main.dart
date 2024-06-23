@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'country_selector.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'validation_bloc.dart';
+import 'validation_event.dart';
+import 'validation_state.dart';
 
-void main() {
+void main() async {
   runApp(MyApp());
 }
 
@@ -14,10 +16,29 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Phone Number Validation',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+      theme: ThemeData.dark().copyWith(
+        primaryColor: Colors.blue,
+        scaffoldBackgroundColor: Colors.black,
+        colorScheme: ColorScheme.dark().copyWith(
+          primary: Colors.blue,
+          secondary: Colors.blue,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          border: UnderlineInputBorder(),
+          filled: true,
+          fillColor: Colors.white,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue,
+            foregroundColor: Colors.white, 
+          ),
+        ),
       ),
-      home: PhoneNumberValidationPage(),
+      home: BlocProvider(
+        create: (context) => ValidationBloc(),
+        child: PhoneNumberValidationPage(),
+      ),
     );
   }
 }
@@ -44,55 +65,6 @@ class _PhoneNumberValidationPageState extends State<PhoneNumberValidationPage> {
     await prefs.setString('phoneNumber', phoneNumber);
   }
 
-  Future<void> validatePhoneNumber(String phoneNumber) async {
-    final accountSid = ''; 
-    final authToken = ''; 
-    final basicAuth =
-        'Basic ' + base64Encode(utf8.encode('$accountSid:$authToken'));
-
-    // print(countryCode);
-    // print(phoneNumber);
-    String flagAssetUpper = flagAsset.toUpperCase();
-    // print(flagAssetIpper);
-    String judge = countryCode + phoneNumber;
-    print(judge);
-
-    final response = await http.get(
-      // Uri.parse('https://lookups.twilio.com/v1/PhoneNumbers/$phoneNumber?CountryCode=${countryCode.substring(1)}'),
-      Uri.parse('https://lookups.twilio.com/v1/PhoneNumbers/$judge?CountryCode=$flagAssetUpper'),
-      headers: {
-        'Authorization': basicAuth,
-      },
-    );
-
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
-
-    if (response.statusCode == 200) {
-      final responseData = json.decode(response.body);
-      final formattedNumber = responseData['phone_number'];
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ValidationResultPage(
-            phoneNumber: formattedNumber,
-            isValid: true,
-          ),
-        ),
-      );
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ValidationResultPage(
-            phoneNumber: phoneNumber,
-            isValid: false,
-          ),
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,16 +72,17 @@ class _PhoneNumberValidationPageState extends State<PhoneNumberValidationPage> {
         title: Center(child: Text('Validate phone number')),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(4.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             SvgPicture.asset(
-              'assets/phone_icon.svg', // 确保在项目的 assets 目录下有这个文件
+              'assets/phone_icon.svg',
               height: 100,
+              color: Colors.white,
             ),
             SizedBox(height: 20),
-            Text('Please enter a phone number:'),
+            Text('Please enter a phone number:', style: TextStyle(color: Colors.white)),
             SizedBox(height: 20),
             Row(
               children: <Widget>[
@@ -126,8 +99,10 @@ class _PhoneNumberValidationPageState extends State<PhoneNumberValidationPage> {
                     }
                   },
                   child: Container(
+                    height: 54,
                     padding: EdgeInsets.symmetric(horizontal: 8.0),
                     decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.5), 
                       border: Border.all(color: Colors.grey),
                       borderRadius: BorderRadius.circular(8.0),
                     ),
@@ -138,7 +113,7 @@ class _PhoneNumberValidationPageState extends State<PhoneNumberValidationPage> {
                           height: 24,
                         ),
                         SizedBox(width: 8),
-                        Text(countryCode),
+                        Text(countryCode, style: TextStyle(color: Colors.black)),
                       ],
                     ),
                   ),
@@ -149,21 +124,57 @@ class _PhoneNumberValidationPageState extends State<PhoneNumberValidationPage> {
                     controller: phoneNumberController,
                     keyboardType: TextInputType.phone,
                     decoration: InputDecoration(
-                      border: OutlineInputBorder(),
+                      border: UnderlineInputBorder(), 
                       labelText: 'Phone Number',
+                      labelStyle: TextStyle(color: Color.fromARGB(255, 99, 98, 98)),
+                      fillColor: Colors.transparent,
+                      filled: true,
                     ),
                   ),
                 ),
               ],
             ),
             SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                final phoneNumber = phoneNumberController.text;
-                storePhoneNumber(phoneNumber);
-                await validatePhoneNumber(phoneNumber);
+            BlocConsumer<ValidationBloc, ValidationState>(
+              listener: (context, state) {
+                if (state is ValidationSuccess) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ValidationResultPage(
+                        phoneNumber: state.phoneNumber,
+                        isValid: true,
+                      ),
+                    ),
+                  );
+                } else if (state is ValidationFailure) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ValidationResultPage(
+                        phoneNumber: phoneNumberController.text,
+                        isValid: false,
+                      ),
+                    ),
+                  );
+                }
               },
-              child: Text('Confirm'),
+              builder: (context, state) {
+                if (state is ValidationLoading) {
+                  return CircularProgressIndicator();
+                }
+
+                return ElevatedButton(
+                  onPressed: () {
+                    final phoneNumber = phoneNumberController.text;
+                    storePhoneNumber(phoneNumber);
+                    BlocProvider.of<ValidationBloc>(context).add(
+                      ValidatePhoneNumber(countryCode: countryCode, phoneNumber: phoneNumber, flagAsset: flagAsset),
+                    );
+                  },
+                  child: Text('Confirm'),
+                );
+              },
             ),
           ],
         ),
@@ -173,6 +184,7 @@ class _PhoneNumberValidationPageState extends State<PhoneNumberValidationPage> {
 }
 
 class ValidationResultPage extends StatelessWidget {
+  
   final String phoneNumber;
   final bool isValid;
 
@@ -190,7 +202,7 @@ class ValidationResultPage extends StatelessWidget {
           children: <Widget>[
             Text(
               'Phone Number: $phoneNumber',
-              style: TextStyle(fontSize: 20),
+              style: TextStyle(fontSize: 20, color: Colors.white),
             ),
             SizedBox(height: 20),
             Text(

@@ -13,6 +13,7 @@ class _CountrySelectorPageState extends State<CountrySelectorPage> {
   List<dynamic> filteredList = [];
   bool isLoading = true;
   bool hasError = false;
+  TextEditingController searchController = TextEditingController();
 
   @override
   void initState() {
@@ -85,7 +86,15 @@ class _CountrySelectorPageState extends State<CountrySelectorPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Select Country'),
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.close),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        ],
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
@@ -95,17 +104,30 @@ class _CountrySelectorPageState extends State<CountrySelectorPage> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: TextField(
-                        onChanged: (value) {
-                          filterCountries(value);
-                        },
-                        decoration: InputDecoration(
-                          labelText: 'Search',
-                          prefixIcon: Icon(Icons.search),
-                          border: OutlineInputBorder(),
-                        ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.search, color: Colors.white),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: TextField(
+                              controller: searchController,
+                              onChanged: (value) {
+                                filterCountries(value);
+                              },
+                              decoration: InputDecoration(
+                                hintText: 'Search',
+                                hintStyle: TextStyle(color: Colors.white),
+                                border: UnderlineInputBorder(),
+                                fillColor: Colors.transparent,
+                                filled: true,
+                              ),
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+
                     Expanded(
                       child: ListView.builder(
                         itemCount: filteredList.length,
@@ -118,7 +140,7 @@ class _CountrySelectorPageState extends State<CountrySelectorPage> {
                               width: 32,
                               placeholderBuilder: (BuildContext context) => CircularProgressIndicator(),
                             ),
-                            title: Text('${country['code']} ${country['name']}'),
+                            title: Text('${country['code']} ${country['name']}', style: TextStyle(color: Colors.white)),
                             onTap: () {
                               Navigator.pop(context, {'code': country['code'], 'flag': country['flag']});
                             },
