@@ -22,8 +22,18 @@ class _CountrySelectorPageState extends State<CountrySelectorPage> {
 
   void fetchCountries() async {
     try {
-      final namesResponse = await http.get(Uri.parse('https://country.io/names.json'));
-      final phoneResponse = await http.get(Uri.parse('https://country.io/phone.json'));
+      final headers = {
+        'Access-Control-Allow-Origin': '*',
+      };
+
+      final namesResponse = await http.get(
+        Uri.parse('http://127.0.0.1:3000/api/names.json'),
+        headers: headers,
+      );
+      final phoneResponse = await http.get(
+        Uri.parse('http://127.0.0.1:3000/api/phone.json'),
+        headers: headers,
+      );
 
       if (namesResponse.statusCode == 200 && phoneResponse.statusCode == 200) {
         final names = json.decode(namesResponse.body) as Map<String, dynamic>;
@@ -103,11 +113,11 @@ class _CountrySelectorPageState extends State<CountrySelectorPage> {
                           final country = filteredList[index];
                           print('Displaying country: ${country['name']}');
                           return ListTile(
-                            // leading: SvgPicture.network(
-                            //   'https://cdn.jsdelivr.net/gh/lipis/flag-icons/flags/4x3/${country['flag']}.svg',
-                            //   width: 32,
-                            //   placeholderBuilder: (BuildContext context) => CircularProgressIndicator(),
-                            // ),
+                            leading: SvgPicture.network(
+                              'https://cdn.jsdelivr.net/gh/lipis/flag-icons/flags/4x3/${country['flag']}.svg',
+                              width: 32,
+                              placeholderBuilder: (BuildContext context) => CircularProgressIndicator(),
+                            ),
                             title: Text('${country['code']} ${country['name']}'),
                             onTap: () {
                               Navigator.pop(context, {'code': country['code'], 'flag': country['flag']});
