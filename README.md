@@ -25,11 +25,13 @@ No need to go through this step, already done;
 Enter `node proxy.js` in the terminal;
 
 ### Register for Twilio and get your accountSid and authToken
-Fill in the null char in validation_bloc.dart file
+Fill in the null char in validation_bloc.dart file:
+
 `final accountSid = ''; // Twilio Account SID`
+
 `final authToken = ''; // Twilio Auth Token`
 
-###Run result
+### Run result
 ![Pict](./showPict/1.png "1")
 ![Pict](./showPict/2.png "1")
 ![Pict](./showPict/3.png "1")
