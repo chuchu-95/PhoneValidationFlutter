@@ -25,7 +25,7 @@ class PhoneNumberValidationPage extends StatefulWidget {
 }
 
 class _PhoneNumberValidationPageState extends State<PhoneNumberValidationPage> {
-  String countryCode = '+852';
+  String countryCode = '852';
   String flagAsset = 'hk';
 
   void updateCountry(String code, String flag) {
