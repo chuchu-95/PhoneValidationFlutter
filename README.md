@@ -10,7 +10,7 @@ This project aims to search the country code and verify the input phone number.
 ### Preparation for flutter in Vscode
 - Install extension for Flutter;
 - Press `Ctrl+Shift+P` and enter `Flutter: New Project`;
-- Choose `File > Open Folder`, enter the new project;
+- Choose `File > Open Folder`, open the new project;
 - Type `flutter run` in the termial;
 
 
