@@ -15,7 +15,7 @@ This project aims to search the country code and verify the input phone number.
 
 
 ### Install proxy server to avoid CORS
-**Before going through this step, you need to install node.js in your device. Make sure `node` command is in your environment variables**
+**Before going through this step, you need to install node.js in your device. Make sure `node` command is in your environment variables;**
 - Install http-proxy-middleware
 
 Enter `npm install http-proxy-middleware` in the terminal;
