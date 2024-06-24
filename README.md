@@ -16,15 +16,19 @@ This project aims to search the country code and verify the input phone number.
 
 ### Install proxy server to avoid CORS
 - Install http-proxy-middleware
+
 Create a `proxy.js` file in the root directory, enter `npm install http-proxy-middleware` in the terminal;
 
 - Configuration
+  
 No need to go through this step, already done;
 
 - Run the proxy server
-Enter `node proxy.js` in the terminal;
+
+Run `node proxy.js` in the terminal;
 
 ### Register for Twilio and get your accountSid and authToken
+After register for twilio, create a service.
 Fill in the null char in validation_bloc.dart file:
 
 `final accountSid = ''; // Twilio Account SID`
