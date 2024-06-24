@@ -8,20 +8,23 @@ A Flutter project.
 This project aims to search the country code and verify the input phone number.
 
 ### Preparation for flutter in Vscode
-- Install extension for Flutter;
+- Install Flutter extension;
 - Press `Ctrl+Shift+P` and enter `Flutter: New Project`;
 - Choose `File > Open Folder`, open the new project;
-- Type `flutter run` in the termial;
+
 
 
 ### Install proxy server to avoid CORS
+**Before going through this step, you need to install node.js in your device. Make sure `node` command is in your environment variables**
 - Install http-proxy-middleware
 
-Create a `proxy.js` file in the root directory, enter `npm install http-proxy-middleware` in the terminal;
+Enter `npm install http-proxy-middleware` in the terminal;
+
+The `proxy.js` file is already in the root directory.
 
 - Configuration
   
-No need to go through this step, already done;
+No need to go through this step, already done in `package.json`;
 
 - Run the proxy server
 
